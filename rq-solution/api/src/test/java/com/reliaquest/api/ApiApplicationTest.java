@@ -51,7 +51,7 @@ public class ApiApplicationTest {
     }
 
     @Test
-    void getAllEmployees_OK() throws Exception {
+    void testgetAllEmployees_OK() throws Exception {
         when(iEmployeeService.getAllEmployees())
                 .thenReturn(List.of(employee));
         this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/employee/all"))
@@ -61,7 +61,7 @@ public class ApiApplicationTest {
     }
 
     @Test
-    void getEmployeeById_OK() throws Exception {
+    void testgetEmployeeById_OK() throws Exception {
         String uuid = "42d1bee9-3e39-4479-acdd-020224052403";
         when(iEmployeeService.getEmployeeById(uuid))
                 .thenReturn(employee);
@@ -72,7 +72,7 @@ public class ApiApplicationTest {
     }
 
     @Test
-    void getEmployeeHighestSalary_OK() throws Exception {
+    void testgetEmployeeHighestSalary_OK() throws Exception {
         when(iEmployeeService.getHighestSalaryOfEmployees())
                 .thenReturn(40000);
         this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/employee/highest/salary"))
@@ -81,16 +81,16 @@ public class ApiApplicationTest {
     }
 
     @Test
-    void getTop10HighSalaryEmployees_OK() throws Exception {
+    void testgetTop10HighSalaryEmployees_OK() throws Exception {
         when(iEmployeeService.getTop10HighestEarningEmployeeNames())
                 .thenReturn(List.of(employee));
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/employee/highest"))
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/employee/highest/top10"))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
-    void getEmployeeByNameSearch_OK() throws Exception {
+    void testgetEmployeeByNameSearch_OK() throws Exception {
         when(iEmployeeService.getEmployeesByNameSearch(name))
                 .thenReturn(List.of(employee));
         this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/employee/name/" + name))
@@ -100,7 +100,7 @@ public class ApiApplicationTest {
     }
 
     @Test
-    void createEmployee_OK() throws Exception {
+    void testcreateEmployee_OK() throws Exception {
         when(iEmployeeService.createEmployee(createEmployee)).thenReturn(
                 employee);
         this.mockMvc.perform(MockMvcRequestBuilders.post("/v1/employee/create")
@@ -110,6 +110,101 @@ public class ApiApplicationTest {
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.employee_name").value(name));
+    }
+
+    @Test
+    void testgetAllEmployees_Exception() throws Exception {
+        when(iEmployeeService.getAllEmployees())
+                .thenThrow(new Exception("Unable to access resource"));
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/employee/all"))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    void testgetAllEmployees_IOException() throws Exception {
+        when(iEmployeeService.getAllEmployees())
+                .thenThrow(new Exception("Server Error Occurred"));
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/employee/all"))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    void testgetEmployeeById_RunTimeException() throws Exception {
+        when(iEmployeeService.getEmployeeById(null))
+                .thenThrow(new RuntimeException("Unable to access resource"));
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/employee/null"))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    void testgetEmployeeById_IOException() throws Exception {
+        when(iEmployeeService.getEmployeeById(null))
+                .thenThrow(new Exception("Server Error Occurred"));
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/employee/null"))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    void testgetEmployeeHighestSalary_RunTimeException() throws Exception {
+        when(iEmployeeService.getHighestSalaryOfEmployees())
+                .thenThrow(new RuntimeException("Unable to access resource"));
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/employee/highest/salary"))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    void testgetEmployeeHighestSalary_IOException() throws Exception {
+        when(iEmployeeService.getHighestSalaryOfEmployees())
+                .thenThrow(new Exception("Server Error Occurred"));
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/employee/highest/salary"))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    void testgetTop10HighSalaryEmployees_RunTimeException() throws Exception {
+        when(iEmployeeService.getTop10HighestEarningEmployeeNames())
+                .thenThrow(new RuntimeException("Unable to access resource"));
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/employee/highest"))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+
+    @Test
+    void testgetEmployeeByNameSearch_RunTimeException() throws Exception {
+        when(iEmployeeService.getEmployeesByNameSearch(null))
+                .thenThrow(new RuntimeException("Unable to access resource"));
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/employee/name"))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    void testgetEmployeeByNameSearch_IOException() throws Exception {
+        when(iEmployeeService.getEmployeesByNameSearch(null))
+                .thenThrow(new Exception("Server Error Occurred"));
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/employee/name"))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    void testcreateEmployee_RunTimeException() throws Exception {
+        when(iEmployeeService.createEmployee(createEmployee))
+                .thenThrow(new RuntimeException("Unable to access resource"));
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/v1/employee/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    void testcreateEmployee_IOException() throws Exception {
+        when(iEmployeeService.createEmployee(createEmployee))
+                .thenThrow(new Exception("Server Error Occurred"));
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/v1/employee/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 
     public static String asJsonString(final Object obj) {
